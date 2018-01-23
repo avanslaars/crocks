@@ -1,13 +1,16 @@
  # All
+
 ```haskell
 All Boolean
 ```
-`All` is a `Monoid` that will combine two values of any type using logical
+
+`All` is a `Monoid` that will combine (2) values of any type using logical
 conjunction (AND) on their coerced `Boolean` values, mapping truth-y values to
 `true` and false-y values to `false`.
 
-```js
+```javascript
 const All = require('crocks/All')
+
 const mconcat = require('crocks/helpers/mconcat')
 
 const trueNum = All(13)
@@ -31,11 +34,13 @@ allGood([ 'nice', '00', null ])
 ```
 
 ## Implements
+
 `Semigroup`, `Monoid`
 
 ## Constructor Methods
 
-### empty
+#### empty
+
 ```haskell
 All.empty :: () -> All
 ```
@@ -45,15 +50,17 @@ provides is `concat`ed to any other value, it will return the other value. In
 the case of `All` the result of `empty` is `true`. `empty` is available on both
 the Constructor and the Instance for convenience.
 
-```js
+```javascript
+const All = require('crocks/All')
+
 All.empty() //=> All true
 
 All(true).concat(All.empty())   //=> All true
 All(false).concat(All.empty())  //=> All false
 ```
 
+#### type
 
-### type
 ```haskell
 All.type :: () -> String
 ```
@@ -66,7 +73,9 @@ calling `type` on a given type, using the `isSameType` function hides much of
 the boilerplate. `type` is available on both the Constructor and the Instance
 for convenience.
 
-```js
+```javascript
+const All = require('crocks/All')
+
 const Maybe = require('crocks/Maybe')
 const isSameType = require('crocks/predicates/isSameType')
 
@@ -80,23 +89,27 @@ isSameType(All(false), Maybe)     //=> false
 
 ## Instance Methods
 
-### concat
+#### concat
+
 ```haskell
 All ~> All -> All
 ```
 
 `concat` is used to combine (2) `Semigroup`s of the same type under an operation
-specified by the `Semigroup`. In the case of `All`, it will combine the two
+specified by the `Semigroup`. In the case of `All`, it will combine the (2)
 using logical AND (conjunction).
 
-```js
+```javascript
+const All = require('crocks/All')
+
 All(true).concat(All(true))   //=> All true
 All(true).concat(All(false))  //=> All false
 All(false).concat(All(true))  //=> All false
 All(false).concat(All(false)) //=> All false
 ```
 
-### valueOf
+#### valueOf
+
 ```haskell
 All ~> () -> Boolean
 ```
@@ -107,8 +120,10 @@ extraction is available, types that implement `valueOf` are not necessarily a
 helper functions that ship with `crocks`. Calling `valueOf` on an `All` instance
 will result in the underlying `Boolean` value.
 
-```js
-All(0).value()          //=> false
+```javascript
+const All = require('crocks/All')
+
+All(0).valueOf()          //=> false
 All('string').valueOf() //=> true
 
 //=> false

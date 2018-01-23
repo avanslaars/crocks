@@ -9,7 +9,8 @@ const _inspect = require('../core/inspect')
 const type = require('../core/types').type('Either')
 
 const compose = require('../core/compose')
-const isApplicative = require('../core/isApplicative')
+const isArray = require('../core/isArray')
+const isApply = require('../core/isApply')
 const isFunction = require('../core/isFunction')
 const isSameType = require('../core/isSameType')
 
@@ -30,11 +31,11 @@ const _of =
   Either.Right
 
 function runSequence(x) {
-  if(!isApplicative(x)) {
+  if(!(isApply(x) || isArray(x))) {
     throw new TypeError('Either.sequence: Must wrap an Applicative')
   }
 
-  return x.map(Either.of)
+  return x.map(v => Either.of(v))
 }
 
 function Either(u) {
@@ -57,8 +58,8 @@ function Either(u) {
 
   const inspect = constant(
     either(
-       l => `Left${_inspect(l)}`,
-       r => `Right${_inspect(r)}`
+      l => `Left${_inspect(l)}`,
+      r => `Right${_inspect(r)}`
     )
   )
 
@@ -137,11 +138,15 @@ function Either(u) {
     if(!either(constant(true), isFunction)) {
       throw new TypeError('Either.ap: Wrapped value must be a function')
     }
+
     else if(!either(constant(true), constant(isSameType(Either, m)))) {
       throw new TypeError('Either.ap: Either required')
     }
 
-    return chain(fn => m.map(fn))
+    return either(
+      Either.Left,
+      fn => m.map(fn)
+    )
   }
 
   function chain(fn) {
@@ -176,20 +181,21 @@ function Either(u) {
 
     const m = either(compose(af, Either.Left), f)
 
-    if(!isApplicative(m)) {
+    if(!(isApply(m) || isArray(m))) {
       throw new TypeError('Either.traverse: Both functions must return an Applicative')
     }
 
     return either(
       constant(m),
-      constant(m.map(Either.of))
+      constant(m.map(v => Either.of(v)))
     )
   }
 
   return {
     inspect, either, type, concat,
     swap, coalesce, equals, map, bimap,
-    alt, ap, of, chain, sequence, traverse
+    alt, ap, of, chain, sequence, traverse,
+    constructor: Either
   }
 }
 

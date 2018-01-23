@@ -7,7 +7,8 @@ const _innerConcat = require('../core/innerConcat')
 const _inspect = require('../core/inspect')
 const type = require('../core/types').type('Identity')
 
-const isApplicative = require('../core/isApplicative')
+const isArray = require('../core/isArray')
+const isApply = require('../core/isApply')
 const isFunction = require('../core/isFunction')
 const isSameType = require('../core/isSameType')
 
@@ -52,6 +53,7 @@ function Identity(x) {
     if(!isFunction(x)) {
       throw new TypeError('Identity.ap: Wrapped value must be a function')
     }
+
     else if(!isSameType(Identity, m)) {
       throw new TypeError('Identity.ap: Identity required')
     }
@@ -77,11 +79,12 @@ function Identity(x) {
     if(!isFunction(af)) {
       throw new TypeError('Identity.sequence: Applicative Function required')
     }
-    else if(!isApplicative(x)) {
+
+    else if(!(isApply(x) || isArray(x))) {
       throw new TypeError('Identity.sequence: Must wrap an Applicative')
     }
 
-    return x.map(Identity)
+    return x.map(v => Identity(v))
   }
 
   function traverse(af, f) {
@@ -91,17 +94,18 @@ function Identity(x) {
 
     const m = f(x)
 
-    if(!isApplicative(m)) {
+    if(!(isApply(m) || isArray(m))) {
       throw new TypeError('Identity.traverse: Both functions must return an Applicative')
     }
 
-    return m.map(Identity)
+    return m.map(v => Identity(v))
   }
 
   return {
     inspect, valueOf, type, equals,
     concat, map, ap, of, chain,
-    sequence, traverse
+    sequence, traverse,
+    constructor: Identity
   }
 }
 

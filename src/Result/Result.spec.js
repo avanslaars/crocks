@@ -30,6 +30,9 @@ test('Result', t => {
   t.ok(isFunction(Result), 'is a function')
   t.ok(isObject(m), 'returns an object')
 
+  t.equals(Result.Ok(true).constructor, Result, 'provides TypeRep on constructor for Ok')
+  t.equals(Result.Err(true).constructor, Result, 'provides TypeRep on constructor for Err')
+
   t.ok(isFunction(Result.of), 'provides an of function')
   t.ok(isFunction(Result.type), 'provides a type function')
   t.ok(isFunction(Result.Err), 'provides an Err function')
@@ -815,12 +818,24 @@ test('Result sequence functionality', t => {
   const e = Err('Err').sequence(MockCrock.of)
 
   t.ok(isSameType(MockCrock, o), 'Provides an outer type of MockCrock')
-  t.ok(isSameType(Result, o.valueOf()), 'Provides an outer type of MockCrock')
+  t.ok(isSameType(Result, o.valueOf()), 'Provides an inner type of Result')
   t.equal(o.valueOf().either(constant(0), identity), x, 'Result contains original inner value')
 
   t.ok(isSameType(MockCrock, e), 'Provides an outer type of MockCrock')
   t.ok(isSameType(Result, e.valueOf()), 'Provides an inner type of Result')
   t.equal(e.valueOf().either(identity, constant(0)), 'Err', 'Result contains original Err value')
+
+  const ar = x => [ x ]
+  const arO = Ok([ x ]).sequence(ar)
+  const arE = Err('Err').sequence(ar)
+
+  t.ok(isSameType(Array, arO), 'Provides an outer type of Array')
+  t.ok(isSameType(Result, arO[0]), 'Provides an inner type of Result')
+  t.equal(arO[0].either(constant(0), identity), x, 'Result contains original inner value')
+
+  t.ok(isSameType(Array, arE), 'Provides an outer type of Array')
+  t.ok(isSameType(Result, arE[0]), 'Provides an inner type of Result')
+  t.equal(arE[0].either(identity, constant(0)), 'Err', 'Result contains original Err value')
 
   t.end()
 })
@@ -900,6 +915,18 @@ test('Result traverse functionality', t => {
   t.ok(isSameType(MockCrock, l), 'Provides an outer type of MockCrock')
   t.ok(isSameType(Result, l.valueOf()), 'Provides an inner type of Result')
   t.equal(l.valueOf().either(identity, constant(0)), 'Err', 'Result contains original Err value')
+
+  const ar = x => [ x ]
+  const arO = Ok(x).traverse(ar, ar)
+  const arE = Err('Err').traverse(ar, ar)
+
+  t.ok(isSameType(Array, arO), 'Provides an outer type of Array')
+  t.ok(isSameType(Result, arO[0]), 'Provides an inner type of Result')
+  t.equal(arO[0].either(constant(0), identity), x, 'Result contains original inner value')
+
+  t.ok(isSameType(Array, arE), 'Provides an outer type of Array')
+  t.ok(isSameType(Result, arE[0]), 'Provides an inner type of Result')
+  t.equal(arE[0].either(identity, constant(0)), 'Err', 'Result contains original Err value')
 
   t.end()
 })
